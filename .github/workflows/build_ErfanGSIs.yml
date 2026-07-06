@@ -40,14 +40,21 @@
                 cd $GITHUB_WORKSPACE/ErfanGSIs
                 mkdir -p ./output
                 sudo bash ./setup.sh
+                sudo apt-get install -y aria2
 
-         - name: Download Stock Rom & Generate GSI
+         - name: Download ROM with aria2c (multi-thread)
+           run: |
+                mkdir -p $GITHUB_WORKSPACE/rom
+                cd $GITHUB_WORKSPACE/rom
+                aria2c -x 8 -s 8 --retry-wait 5 --continue -o stock_rom.tgz "$ROM_URL"
+
+         - name: Generate GSI from local file
            run: |
                 cd $GITHUB_WORKSPACE/ErfanGSIs
                 if [ "$BUILD_TYPE" = "ab" ]; then
-                  sudo bash ./url2GSI.sh -c --ab $ROM_URL $ROM_NAME
+                  sudo bash ./url2GSI.sh -c $GITHUB_WORKSPACE/rom/stock_rom.tgz $ROM_NAME --ab
                 else
-                  sudo bash ./url2GSI.sh -c $ROM_URL $ROM_NAME
+                  sudo bash ./url2GSI.sh -c $GITHUB_WORKSPACE/rom/stock_rom.tgz $ROM_NAME
                 fi
 
          - name: Zip GSI
@@ -56,8 +63,8 @@
                 mkdir -p final
                 zip -r final/GSI.zip ./*
 
-         - name: Upload GSI as Artifact
-           uses: actions/upload-artifact@v4
-           with:
-             name: GSI-Aonly
-             path: /home/runner/work/actions_build_ErfanGSIs/actions_build_ErfanGSIs/ErfanGSIs/output/final/GSI.zip
+         - name: Upload GSI to Release
+           run: |
+                cd $GITHUB_WORKSPACE/ErfanGSIs/output/final
+                gh release upload GSI-Aonly GSI.zip --repo ${{ github.repository }} --clobber || \
+                gh release create GSI-Aonly GSI.zip --repo ${{ github.repository }} --title "GSI-Aonly" --notes "自动构建"
