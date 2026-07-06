@@ -21,33 +21,14 @@
 
          - name: Initialization environment
            run: |
-              sudo apt-get -qq install -y git wget python3-pip
-              sudo ln -sf /usr/bin/pip3 /usr/bin/pip
+              sudo apt-get update
+              sudo apt-get install -y git wget python3-pip
 
          - name: Clone ErfanGSI Source Code
            run: git clone --recurse-submodules https://github.com/erfanoabdi/ErfanGSIs.git ErfanGSIs
 
-         - name: Fix exit
-           run: |
-                sed -i 's/\|\| exit 1//g' $GITHUB_WORKSPACE/ErfanGSIs/url2GSI.sh
-                sed -i 's/exit 1//g' $GITHUB_WORKSPACE/ErfanGSIs/url2GSI.sh
-
-         - name: Setting up ErfanGSI requirements
-           run: |
-                cd $GITHUB_WORKSPACE/ErfanGSIs
-                mkdir -p ./output
-                sudo bash ./setup.sh
-
-         - name: Download Stock Rom & Generate GSI
-           uses: actions/checkout@master
-
-         - name: Initialization environment
-           run: |
-              sudo apt-get -qq install -y git wget python3-pip
-              sudo ln -sf /usr/bin/pip3 /usr/bin/pip
-
-         - name: Clone ErfanGSI Source Code
-           run: git clone --recurse-submodules https://github.com/erfanoabdi/ErfanGSIs.git ErfanGSIs
+         - name: Install pip
+           run: sudo python3 -m pip install --upgrade pip
 
          - name: Fix exit
            run: |
