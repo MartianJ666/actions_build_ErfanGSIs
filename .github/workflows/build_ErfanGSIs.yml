@@ -1,28 +1,19 @@
-name: build_ErfanGSIs
+  name: build_ErfanGSIs
 
-on:
-  #  release:
-  #    types: [published]
-  #  push:
-  #    branches:
-  #      - master
-  #    paths:
-  #      - '.config'
-  #  schedule:
-  #    - cron: 0 8 * * 5
+  on:
     watch:
       types: [started]
 
   env:
-    ROM_URL: https://bigota.d.miui.com/V12.0.2.0.QGGCNXM/begonia_images_V12.0.2.0.QGGCNXM_20200710.0000.00_10.0_cn_83e8f9a4db.tgz
-    ROM_NAME: MIUI
-    BUILD_TYPE: Aonly
-    TZ: Asia/Shanghai
+    ROM_URL: "https://bigota.d.miui.com/V12.0.2.0.QGGCNXM/begonia_images_V12.0.2.0.QGGCNXM_20200710.0000.00_10.0_cn_83e8f9a4db.tgz"
+    ROM_NAME: "MIUI"
+    BUILD_TYPE: "Aonly"
+    TZ: "Asia/Shanghai"
 
   jobs:
     build:
-      runs-on: ubuntu-22.04
-      if: github.event.repository.owner.id == github.event.sender.id
+      runs-on: "ubuntu-22.04"
+      if: ${{ github.event.repository.owner.id == github.event.sender.id }}
 
       steps:
          - name: Checkout
@@ -30,7 +21,7 @@ on:
 
          - name: Initialization environment
            run: |
-              sudo -E apt-get -qq install git wget python3-pip
+              sudo apt-get -qq install -y git wget python3-pip
               sudo ln -sf /usr/bin/pip3 /usr/bin/pip
 
          - name: Clone ErfanGSI Source Code
@@ -44,7 +35,29 @@ on:
          - name: Setting up ErfanGSI requirements
            run: |
                 cd $GITHUB_WORKSPACE/ErfanGSIs
-                mkdir ./output
+                mkdir -p ./output
+                sudo bash ./setup.sh
+
+         - name: Download Stock Rom & Generate GSI
+           uses: actions/checkout@master
+
+         - name: Initialization environment
+           run: |
+              sudo apt-get -qq install -y git wget python3-pip
+              sudo ln -sf /usr/bin/pip3 /usr/bin/pip
+
+         - name: Clone ErfanGSI Source Code
+           run: git clone --recurse-submodules https://github.com/erfanoabdi/ErfanGSIs.git ErfanGSIs
+
+         - name: Fix exit
+           run: |
+                sed -i 's/\|\| exit 1//g' $GITHUB_WORKSPACE/ErfanGSIs/url2GSI.sh
+                sed -i 's/exit 1//g' $GITHUB_WORKSPACE/ErfanGSIs/url2GSI.sh
+
+         - name: Setting up ErfanGSI requirements
+           run: |
+                cd $GITHUB_WORKSPACE/ErfanGSIs
+                mkdir -p ./output
                 sudo bash ./setup.sh
 
          - name: Download Stock Rom & Generate GSI
@@ -53,7 +66,7 @@ on:
          - name: Zip GSI
            run: |
                 cd $GITHUB_WORKSPACE/ErfanGSIs/output
-                mkdir final
+                mkdir -p final
                 zip -r final/GSI.zip ./*
 
          - name: Upload GSI to WeTransfer
