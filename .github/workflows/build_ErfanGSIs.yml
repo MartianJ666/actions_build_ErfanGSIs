@@ -7,7 +7,7 @@
   env:
     ROM_URL: "https://bigota.d.miui.com/V12.0.2.0.QGGCNXM/begonia_images_V12.0.2.0.QGGCNXM_20200710.0000.00_10.0_cn_83e8f9a4db.tgz"
     ROM_NAME: "MIUI"
-    BUILD_TYPE: "Aonly"
+    BUILD_TYPE: "aonly"
     TZ: "Asia/Shanghai"
 
   jobs:
@@ -44,7 +44,11 @@
          - name: Download Stock Rom & Generate GSI
            run: |
                 cd $GITHUB_WORKSPACE/ErfanGSIs
-                sudo bash ./url2GSI.sh -c --$BUILD_TYPE $ROM_URL $ROM_NAME
+                if [ "$BUILD_TYPE" = "ab" ]; then
+                  sudo bash ./url2GSI.sh -c --ab $ROM_URL $ROM_NAME
+                else
+                  sudo bash ./url2GSI.sh -c $ROM_URL $ROM_NAME
+                fi
 
          - name: Zip GSI
            run: |
