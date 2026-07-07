@@ -68,3 +68,10 @@
                 cd $GITHUB_WORKSPACE/ErfanGSIs/output/final
                 gh release upload GSI-Aonly GSI.zip --repo ${{ github.repository }} --clobber || \
                 gh release create GSI-Aonly GSI.zip --repo ${{ github.repository }} --title "GSI-Aonly" --notes "自动构建"
+
+         - name: Upload GSI as Artifact
+           uses: actions/upload-artifact@v4
+           with:
+             name: GSI-Aonly
+             path: /home/runner/work/actions_build_ErfanGSIs/actions_build_ErfanGSIs/ErfanGSIs/output/final/GSI.zip
+
